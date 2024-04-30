@@ -85,15 +85,29 @@ class PasswordManager:
         if os.path.exists('passwords.enc'):
             with open('passwords.enc', 'r') as file:
                 lines = file.readlines()
+
+            # Determine the maximum lengths for each field
+            max_site_length = max_username_length = max_password_length = 0
+            credentials = []
             for index, line in enumerate(lines):
                 encrypted_site, encrypted_username, encrypted_password = line.strip().split(',')
                 site = PasswordManager.decode_password(encrypted_site)
                 username = PasswordManager.decode_password(encrypted_username)
                 password = PasswordManager.decode_password(encrypted_password)
+
+                max_site_length = max(max_site_length, len(site))
+                max_username_length = max(max_username_length, len(username))
+                max_password_length = max(max_password_length, len(password))
+
+                credentials.append((site, username, password))
+
+            # Print each line with formatting to align columns
+            for index, (site, username, password) in enumerate(credentials):
                 if index == 0:
                     print(f"Master Password: {password}")
                 else:
-                    print(f"Website: {site}, Username: {username}, Password: {password}")
+                    print("Website: {0:<{site_width}} | Username: {1:<{user_width}} | Password: {2}".format(
+                        site, username, password, site_width=max_site_length, user_width=max_username_length))
         else:
             print("No passwords stored.")
 
@@ -151,4 +165,3 @@ class PasswordManager:
 
         if not found:
             print("No matching entries found.")
-
